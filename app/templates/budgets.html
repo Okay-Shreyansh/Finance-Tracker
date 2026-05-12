@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="glass-card p-4">
+            <h4><i class="fas fa-chart-line"></i> Set Monthly Budget</h4>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.category_id.label(class="form-label") }}
+                    {{ form.category_id(class="form-select") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.limit_amount.label(class="form-label") }}
+                    {{ form.limit_amount(class="form-control", placeholder="₹ limit") }}
+                </div>
+                {{ form.submit(class="btn btn-primary w-100") }}
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="glass-card p-4">
+            <h4>Budget Progress (This Month)</h4>
+            {% if budgets %}
+                {% for item in budgets %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ item.category }}</strong>
+                        <span>₹{{ "%.2f" % item.spent }} / ₹{{ "%.2f" % item.limit }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar {{ item.bar_class }}" style="width: {{ item.percent | round(1) }};"></div>
+                    </div>
+                    {% if item.alert_80 %}
+                        <div class="small text-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Over 80% spent!
+                        </div>
+                    {% endif %}
+                    {% if item.alert_100 %}
+                        <div class="small text-danger">
+                            <i class="fas fa-times-circle"></i> Budget exceeded!
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No budgets set. Use the form to create one.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

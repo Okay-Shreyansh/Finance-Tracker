@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Summary Cards -->
+    <div class="col-md-4">
+        <div class="summary-card">
+            <i class="fas fa-arrow-up text-success"></i>
+            <h5>Total Income</h5>
+            <h3 class="text-success">₹{{ "%.2f"|format(total_income) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="summary-card">
+            <i class="fas fa-arrow-down text-danger"></i>
+            <h5>Total Expenses</h5>
+            <h3 class="text-danger">₹{{ "%.2f"|format(total_expense) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="summary-card">
+            <i class="fas fa-wallet text-primary"></i>
+            <h5>Net Balance</h5>
+            <h3 class="{% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">₹{{ "%.2f"|format(balance) }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Alerts -->
+{% if alerts %}
+<div class="alert alert-warning mt-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Budget Alerts:</strong>
+    {% for a in alerts %}
+        {{ a.category }} (₹{{ "%.2f"|format(a.spent) }}/₹{{ "%.2f"|format(a.limit) }}) 
+        {% if a.over %}Exceeded!{% else %}Over 80%{% endif %}
+        {% if not loop.last %} • {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Two column layout -->
+<div class="row mt-4 g-4">
+    <!-- Quick Add Income -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="fas fa-plus-circle text-success me-2"></i> Quick Add Income</h5>
+            <form action="{{ url_for('transactions.add_transaction') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="type" value="income">
+                <div class="mb-3">
+                    <input type="number" name="amount" class="form-control" placeholder="Amount (₹)" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <select name="category_id" class="form-select" required>
+                        <option value="">Select Category</option>
+                        {% for cat in income_categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <input type="date" name="date" class="form-control" value="{{ now_date }}" required>
+                </div>
+                <div class="mb-3">
+                    <input type="text" name="description" class="form-control" placeholder="Description (optional)">
+                </div>
+                <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-2"></i>Add Income</button>
+            </form>
+            <hr>
+            <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-outline-primary w-100"><i class="fas fa-exchange-alt me-2"></i>Add Expense or Full Transaction</a>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="col-lg-7">
+        <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="fas fa-history me-2"></i> Recent Activity</h5>
+            {% if recent %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Type</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for txn in recent %}
+                    <tr>
+                        <td>{{ txn.date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ txn.category.name }}</td>
+                        <td>{{ txn.description or '-' }}</td>
+                        <td class="{% if txn.type == 'income' %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+                            ₹{{ "%.2f"|format(txn.amount) }}
+                        </td>
+                        <td><span class="badge {% if txn.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">{{ txn.type }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-sm btn-primary mt-2">View all transactions →</a>
+            {% else %}
+            <p class="text-muted">No transactions yet. Add some income to get started!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Mini Budget Preview (optional) -->
+{% if budgets_preview %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5><i class="fas fa-chart-line me-2"></i> Budget Progress</h5>
+            <div class="row">
+                {% for item in budgets_preview[:3] %}
+                <div class="col-md-4">
+                    <small>{{ item.category }}</small>
+                    <div class="progress mt-1">
+                        <div class="progress-bar {{ item.bar_class }}" style="width: {{ item.percent }}%;"></div>
+                    </div>
+                    <small class="text-muted">₹{{ "%.2f"|format(item.spent) }} / ₹{{ "%.2f"|format(item.limit) }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

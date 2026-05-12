@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card p-4 mb-4">
+    <h5><i class="fas fa-plus-circle text-success"></i> Quick Add Income</h5>
+    <form action="{{ url_for('transactions.add_transaction') }}" method="POST" class="row g-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="type" value="income">
+        <div class="col-md-3"><input type="number" name="amount" class="form-control" placeholder="Amount (₹)" step="0.01" required></div>
+        <div class="col-md-3">
+            <select name="category_id" class="form-select" required>
+                <option value="">Category</option>
+                {% for cat in income_categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2"><input type="date" name="date" class="form-control" value="{{ now_date }}"></div>
+        <div class="col-md-3"><input type="text" name="description" class="form-control" placeholder="Description"></div>
+        <div class="col-md-1"><button type="submit" class="btn btn-success w-100"><i class="fas fa-plus"></i></button></div>
+    </form>
+</div>
+<div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="fas fa-exchange-alt"></i> All Transactions</h3>
+        <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Transaction</a>
+    </div>
+
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr><th>Date</th><th>Category</th><th>Description</th><th>Type</th><th>Amount (₹)</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ txn.category.name }}</td>
+                    <td>{{ txn.description or '-' }}</td>
+                    <td><span class="badge {% if txn.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">{{ txn.type }}</span></td>
+                    <td class="{% if txn.type == 'income' %}text-success{% else %}text-danger{% endif %}">₹{{ "%.2f"|format(txn.amount) }}</td>
+                    <td>
+                        <a href="{{ url_for('transactions.edit_transaction', id=txn.id) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                        <a href="{{ url_for('transactions.delete_transaction', id=txn.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this transaction?')"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No transactions yet. <a href="{{ url_for('transactions.add_transaction') }}">Add your first transaction</a></div>
+    {% endif %}
+</div>
+{% endblock %}

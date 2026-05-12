@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card p-4">
+    <h2><i class="fas fa-user"></i> Your Profile</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Member since:</strong> {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'N/A' }}</p>
+    <hr>
+    <p><a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-3">
+            <h5 class="text-center"><i class="fas fa-chart-pie"></i> Expense Distribution (This Month)</h5>
+            <canvas id="expensePieChart" height="250"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-3">
+            <h5 class="text-center"><i class="fas fa-chart-bar"></i> Monthly Income vs Expense</h5>
+            <canvas id="monthlyBarChart" height="250"></canvas>
+        </div>
+    </div>
+</div>
+<div id="analytics-data" style="display: none;"></div>  <!-- triggers JS fetch -->
+{% endblock %}

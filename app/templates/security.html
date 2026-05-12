@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card p-4">
+    <h2><i class="fas fa-shield-alt"></i> Security Features</h2>
+    <ul>
+        <li><strong>Password Hashing:</strong> Uses PBKDF2 with HMAC-SHA256 (Werkzeug).</li>
+        <li><strong>CSRF Protection:</strong> Every form has a unique token (Flask-WTF).</li>
+        <li><strong>SQL Injection Prevention:</strong> All queries use SQLAlchemy ORM (parameterized).</li>
+        <li><strong>XSS Protection:</strong> Jinja2 autoescaping on all templates.</li>
+        <li><strong>Session Security:</strong> HttpOnly, SameSite=Lax cookies.</li>
+        <li><strong>Access Control:</strong> Every request checks ownership of data.</li>
+    </ul>
+    <p>Your financial data is stored locally in an encrypted database and never shared with third parties.</p>
+</div>
+{% endblock %}

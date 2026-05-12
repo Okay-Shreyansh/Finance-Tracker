@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card p-4">
+    <h2><i class="fas fa-question-circle"></i> Help Center</h2>
+    <input type="text" id="searchHelp" class="form-control mb-3" placeholder="Search help topics...">
+    <div id="helpTopics">
+        <div class="help-item">
+            <h5>How do I add a transaction?</h5>
+            <p>Go to Transactions → Add Transaction. Fill in the amount, category, date and description.</p>
+        </div>
+        <div class="help-item">
+            <h5>How do I set a budget?</h5>
+            <p>Navigate to Budgets, choose a category and set a monthly limit. Progress bars will show your spending.</p>
+        </div>
+        <div class="help-item">
+            <h5>What are AI Insights?</h5>
+            <p>Our AI (powered by Groq) analyzes your last 30 days of transactions and gives personalized financial advice.</p>
+        </div>
+        <div class="help-item">
+            <h5>Is my data secure?</h5>
+            <p>Yes! Passwords are hashed, all forms have CSRF protection, and we use SQLAlchemy to prevent SQL injection.</p>
+        </div>
+    </div>
+</div>
+<script>
+document.getElementById('searchHelp').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    document.querySelectorAll('.help-item').forEach(item => {
+        let text = item.innerText.toLowerCase();
+        item.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

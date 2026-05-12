@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- ========== ORIGINAL AI ADVICE CARD ========== -->
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-robot fa-3x text-primary"></i>
+                <div>
+                    <h3 class="mb-1">AI Financial Advisor</h3>
+                    <p class="mb-0">{{ overall_advice }}</p>
+                    <small class="text-muted">Based on your current month's income vs expenses</small>
+                </div>
+            </div>
+            <hr>
+            <div class="row text-center">
+                <div class="col-4"><strong>Income</strong><br>₹{{ "%.2f"|format(total_income) }}</div>
+                <div class="col-4"><strong>Expenses</strong><br>₹{{ "%.2f"|format(total_expense) }}</div>
+                <div class="col-4"><strong>Net Savings</strong><br><span class="{% if net >= 0 %}text-success{% else %}text-danger{% endif %}">₹{{ "%.2f"|format(net) }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== PER‑CATEGORY BURN RATE + WITTY NUDGES ========== -->
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h4><i class="fas fa-fire"></i> Burn Rate & Projections</h4>
+            <p class="small text-muted">Daily burn = spent / days passed. Projected = burn × total days. Over‑budget categories get a witty nudge.</p>
+            {% if category_data %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr><th>Category</th><th>Spent (₹)</th><th>Budget (₹)</th><th>Burn Rate (₹/day)</th><th>Projected (₹)</th><th>Witty Nudge</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in category_data %}
+                        <tr class="{% if cat.projected > cat.budget and cat.budget > 0 %}table-warning{% endif %}">
+                            <td><strong>{{ cat.name }}</strong></td>
+                            <td>₹{{ cat.spent }}</td>
+                            <td>{% if cat.budget > 0 %}₹{{ cat.budget }}{% else %}—{% endif %}</td>
+                            <td>₹{{ cat.burn_rate }}</td>
+                            <td class="{% if cat.projected > cat.budget and cat.budget > 0 %}text-danger fw-bold{% endif %}">
+                                ₹{{ cat.projected }}
+                            </td>
+                            <td><i class="fas fa-comment-dots text-info"></i> {{ cat.nudge }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No spending recorded this month. Add transactions to see projections!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ========== BUDGET VS PROJECTED CHART ========== -->
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5><i class="fas fa-chart-bar"></i> Budget vs Projected (categories with a budget)</h5>
+            <canvas id="projectionChart" height="250"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const data = {{ category_data | tojson }};
+    const filtered = data.filter(c => c.budget > 0).slice(0, 5);
+    const labels = filtered.map(c => c.name);
+    const budgetVals = filtered.map(c => c.budget);
+    const projectedVals = filtered.map(c => c.projected);
+    const ctx = document.getElementById('projectionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Budget', data: budgetVals, backgroundColor: '#6366f1' },
+                { label: 'Projected (burn rate × days)', data: projectedVals, backgroundColor: '#f59e0b' }
+            ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true, title: { display: true, text: 'Amount (₹)' } } } }
+    });
+</script>
+{% endblock %}
